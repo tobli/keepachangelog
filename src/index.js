@@ -6,8 +6,8 @@ var {promisify} = require('bluebird');
 var readFile = promisify(fs.readFile);
 var writeFile = promisify(fs.writeFile);
 
-var parseChangelog = require('./parser');
-var buildChangelog = require('./builder');
+import parseChangelog from './parser';
+import buildChangelog from './builder'
 
 export function parse(content) {
   return new Changelog(parseChangelog(content));

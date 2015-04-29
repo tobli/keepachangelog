@@ -1,7 +1,7 @@
 'use strict';
 
-var {map, capitalize} = require('lodash-node');
-var semver = require('semver');
+import {map, capitalize} from 'lodash-node';
+import semver from 'semver';
 
 /**
  * Create a markdown string from a changelog structure.
@@ -25,7 +25,7 @@ function buildElementList(md, sep) {
 
 
 /**
- * Build a JsonML element
+ * Build a JsonML Markdown element
  *
  * element
  *    = [ tag-name , attributes , element-list ]
@@ -39,7 +39,8 @@ function buildElement(el) {
   if (typeof el == 'string')
     return el;
 
-  var tagName = el.shift();
+  var tagName = el[0];
+  el = el.slice(1)
 
   switch (tagName) {
     case 'header':
@@ -52,6 +53,29 @@ function buildElement(el) {
       return buildAndSurroundElementList('*', el);
     case 'link':
       return buildLink(el);
+    case 'link_ref':
+      return buildLinkRef(el);
+    default:
+      throw new Error(`Unknown tag ${tagName}`);
+  }
+}
+
+/**
+ * Returns only the text content of a Markdown element.
+ *
+ * For example, if the markdown is a link contained in em tags, the
+ * function only returns the actual text.
+ */
+export function elementText(el) {
+  if (typeof el == 'string')
+    return el;
+
+  var tagName = el[0];
+
+  switch (tagName) {
+    case 'header':
+    case 'link_ref':
+      return elementText(el[2]);
     default:
       throw new Error(`Unknown tag ${tagName}`);
   }
@@ -60,6 +84,11 @@ function buildElement(el) {
 
 function buildLink(el) {
   return `[${el[1]}](${el[0].href})`;
+}
+
+
+function buildLinkRef(el) {
+  return el[0].original
 }
 
 

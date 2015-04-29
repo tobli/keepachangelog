@@ -1,16 +1,25 @@
 'use strict';
 
-var {repeat, parseTill, takeTill} = require('./utils');
+import {markdown} from 'markdown';
+import {extend, map} from 'lodash-node'
+import semver from 'semver';
 
-var markdown = require('markdown').markdown;
-var _ = require('lodash-node');
-var semver = require('semver');
+import {elementText} from './builder'
+import {repeat, parseTill, takeTill} from './utils';
+
 
 var UNRELEASED_RE = /^(unreleased|upcoming)$/i;
 
 export default function parseChangelog(string) {
   var md = markdown.parse(string);
   md.shift();
+
+  var references;
+  if (md[0].references) {
+    references = md.shift().references;
+  } else {
+    references = {};
+  }
   var prelude = parsePrelude(md);
   var releases = parseReleases(md);
   var epilogue = md;
@@ -22,17 +31,17 @@ var parsePrelude = takeTill(isReleaseHeader);
 var parseReleases = repeat(parseRelease);
 
 function parseRelease(els) {
-  var el = els[0];
-  if (!isReleaseHeader(el))
+  if (!isReleaseHeader(els[0]))
     return null;
 
-  els.shift();
-  var title = el[2];
+  var header = els.shift();
+  var titleElement = header[2];
+  var title = elementText(titleElement)
 
   var prelude = parseContent(els);
 
-  var release = _.extend({
-    title: title,
+  var release = extend({
+    title: titleElement,
     prelude: prelude,
   }, parseReleaseDetails(title));
 
@@ -47,9 +56,12 @@ function parseRelease(els) {
 
 
 function isReleaseHeader(el) {
-  return isHeader(el) && el[1].level === 2 &&
-         ( el[2].match(/^v?\d+\.\d+\.\d+/) ||
-           el[2].match(UNRELEASED_RE));
+  if (!isHeaderLevel(el, 2))
+    return false;
+
+  let text = elementText(el);
+  return ( text.match(/^v?\d+\.\d+\.\d+/) ||
+           text.match(UNRELEASED_RE));
 }
 
 function parseReleaseDetails(str) {
@@ -99,11 +111,15 @@ function extractBulletList(md) {
   if (!(list && list[0] === 'bulletlist'))
     return null;
 
-  return _.map(list.slice(1), function(item) {
+  return map(list.slice(1), function(item) {
     return item.slice(1);
   });
 }
 
 function isHeader(el) {
   return el && el[0] === 'header';
+}
+
+function isHeaderLevel (el, level) {
+  return isHeader(el) && el[1].level === level;
 }
