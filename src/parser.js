@@ -32,7 +32,6 @@ function parseRelease(els) {
   var prelude = parseContent(els);
 
   var release = _.extend({
-    title: title,
     prelude: prelude,
   }, parseReleaseDetails(title));
 

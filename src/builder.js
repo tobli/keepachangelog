@@ -83,7 +83,7 @@ function buildAndSurroundElementList (marker, els) {
 
 function buildReleases(releases) {
   return map(releases, (release) => {
-    var title = getReleaseTitle(release);
+    var title = buildReleaseTitle(release);
     return buildHeader([{level: 2}, title]) +
            buildVersionLog('Added', release) +
            buildVersionLog('Changed', release) +
@@ -95,14 +95,14 @@ function buildReleases(releases) {
 }
 
 
-function getReleaseTitle({title, version}) {
-  if (title)
-    return title;
-
-  if (semver.valid(version))
-    return 'v' + version;
-
-  return capitalize(version);
+function buildReleaseTitle({version, date}) {
+  if (version == 'upcoming') {
+    return capitalize(version);
+  }
+  if (!date) {
+    return version;
+  }
+  return version + ' - ' + date;
 }
 
 function buildVersionLog(name, release) {
