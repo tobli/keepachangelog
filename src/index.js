@@ -42,20 +42,20 @@ Changelog.prototype.getRelease = function(version) {
 };
 
 
-Changelog.prototype.addUpcomingChange = function(desc) {
-  this.addUpcoming('Changed', desc);
+Changelog.prototype.addUnreleasedChange = function(desc) {
+  this.addUnreleased('Changed', desc);
 };
 
-Changelog.prototype.addUpcoming = function(type, desc) {
-  var upcoming = this.getRelease('upcoming');
-  if (!upcoming) {
-    upcoming = { version: 'upcoming' };
-    this.releases.unshift(upcoming);
+Changelog.prototype.addUnreleased = function(type, desc) {
+  var unreleased = this.getRelease('Unreleased');
+  if (!unreleased) {
+    unreleased = { version: 'Unreleased' };
+    this.releases.unshift(unreleased);
   }
 
-  var changes = upcoming[type];
+  var changes = unreleased[type];
   if (!changes) {
-    upcoming[type] = changes = [];
+    unreleased[type] = changes = [];
   }
 
   changes.push([desc]);

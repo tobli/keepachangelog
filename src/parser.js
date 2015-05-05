@@ -6,8 +6,6 @@ var markdown = require('markdown').markdown;
 var _ = require('lodash-node');
 var semver = require('semver');
 
-var UNRELEASED_RE = /^(unreleased|upcoming)$/i;
-
 export default function parseChangelog(string) {
   var md = markdown.parse(string);
   md.shift();
@@ -48,12 +46,12 @@ function parseRelease(els) {
 function isReleaseHeader(el) {
   return isHeader(el) && el[1].level === 2 &&
          ( el[2].match(/^v?\d+\.\d+\.\d+/) ||
-           el[2].match(UNRELEASED_RE));
+           el[2] === 'Unreleased');
 }
 
 function parseReleaseDetails(str) {
-  if (str.match(UNRELEASED_RE))
-    return { version: 'upcoming' };
+  if (str === 'Unreleased')
+    return { version: 'Unreleased' };
 
   var versionMatch = str.match(/^v?(\d+\.\d+\.\d+)/);
   if (!versionMatch)
